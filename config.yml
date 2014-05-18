@@ -1,0 +1,6 @@
+config:
+    broadcast:
+        use: true
+        time: 3
+    vip:
+        multi: 1.5
