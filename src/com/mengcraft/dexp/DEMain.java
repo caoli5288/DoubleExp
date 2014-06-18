@@ -4,21 +4,23 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mcstats.Metrics;
+
+import java.io.IOException;
 
 public class DEMain extends JavaPlugin implements Listener {
 
-    public static Plugin plugin = null;
+    public static Plugin plugin;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         plugin = this;
-        getServer().getPluginManager().registerEvents(this, this);
+        DEListener listener = new DEListener();
+        getServer().getPluginManager().registerEvents(listener, plugin);
         boolean isBroadcast = getConfig().getBoolean("config.broadcast.use");
         if (isBroadcast) {
             DEThread deThread = new DEThread();
@@ -26,6 +28,12 @@ public class DEMain extends JavaPlugin implements Listener {
         }
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "梦梦家高性能服务器出租");
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "淘宝店 http://shop105595113.taobao.com");
+        try {
+            Metrics metrics = new Metrics(this);
+            metrics.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -63,35 +71,5 @@ public class DEMain extends JavaPlugin implements Listener {
         return true;
     }
 
-    @EventHandler
-    public void onServerExp(PlayerExpChangeEvent event) {
-        if (getConfig().getBoolean("server.exp.use")) {
-            long currentTime = System.currentTimeMillis();
-            long setTime = getConfig().getLong("server.exp.time");
-            if (currentTime <= setTime) {
-                float expMulti = (float) getConfig().getDouble("server.exp.multi");
-                int expBefore = event.getAmount();
-                float expAfter = expBefore * expMulti;
-                String string = expMulti + "倍经验活动中! 你获得 " + expAfter + " 点经验";
-                event.setAmount(Math.round(expAfter));
-                event.getPlayer().sendMessage(ChatColor.GREEN + string);
-            } else {
-                getConfig().set("server.exp", null);
-                String string = "多倍经验活动已结束!";
-                getServer().broadcastMessage(ChatColor.RED + string);
-                getServer().broadcastMessage(ChatColor.RED + string);
-                getServer().broadcastMessage(ChatColor.RED + string);
-            }
-        }
-    }
 
-    @EventHandler
-    public void onVIPExp(PlayerExpChangeEvent event) {
-        if (event.getPlayer().hasPermission("dexp.vip")) {
-            int expBefore = event.getAmount();
-            double expMulti = getConfig().getDouble("config.vip.multi");
-            int extAfter = (int) (expBefore * expMulti);
-            event.setAmount(extAfter);
-        }
-    }
 }

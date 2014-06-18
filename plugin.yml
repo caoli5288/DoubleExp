@@ -1,6 +1,6 @@
 name: DoubleExp
 main: com.mengcraft.dexp.DEMain
-version: 0.2.1
+version: 0.2.2
 commands:
   dexp:
     permission: dexp.admin
